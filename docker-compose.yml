@@ -1,0 +1,140 @@
+# ============================================
+# SafeRide v2.0 - Docker Compose
+# ============================================
+# 
+# Production-ready container orchestration
+# Run with: docker-compose up -d
+#
+# Services:
+# - api-gateway: Node.js Express API (port 3000)
+# - ai-service: Python FastAPI (port 8001)
+# - mongodb: Database (port 27017)
+# - redis: Cache & Pub/Sub (port 6379)
+# ============================================
+
+services:
+  # ==========================================
+  # API Gateway - Node.js Express
+  # ==========================================
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: SafeRide-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MONGODB_URI=mongodb://mongodb:27017/SafeRide
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - AI_SERVICE_URL=http://ai-service:8001
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:8081
+      - SOCKET_CORS_ORIGINS=http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:8081
+    depends_on:
+      - mongodb
+      - redis
+      - ai-service
+    networks:
+      - SafeRide-network
+    volumes:
+      - ./api-gateway/uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ==========================================
+  # AI Service - Python FastAPI
+  # ==========================================
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: SafeRide-ai
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - SafeRide-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    # Allocate more resources for face recognition
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  # ==========================================
+  # MongoDB Database
+  # ==========================================
+  mongodb:
+    image: mongo:7.0
+    container_name: SafeRide-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=SafeRide
+    volumes:
+      - mongodb-data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - SafeRide-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==========================================
+  # Redis Cache
+  # ==========================================
+  redis:
+    image: redis:7-alpine
+    container_name: SafeRide-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - SafeRide-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# ==========================================
+# Volumes
+# ==========================================
+volumes:
+  mongodb-data:
+    driver: local
+  redis-data:
+    driver: local
+
+# ==========================================
+# Networks
+# ==========================================
+networks:
+  SafeRide-network:
+    driver: bridge
