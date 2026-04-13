@@ -17,7 +17,11 @@
 }
 
 .dark {
+<<<<<<< HEAD
   /* Dynamic Primary - Dark Mode (Optimus style Inverted Monochrome) */
+=======
+  /* Dynamic Primary - Dark Mode (Inverted Monochrome) */
+>>>>>>> friend/main
   --primary-50: 26 26 26;     /* #1a1a1a (soft card bg) */
   --primary-100: 34 34 34;    /* #222 (borders/hovers) */
   --primary-200: 51 51 51;    /* #333 */
@@ -32,7 +36,11 @@
 
 @layer base {
   body {
+<<<<<<< HEAD
     @apply antialiased bg-gray-50 text-gray-900 transition-colors duration-300 ease-in-out font-sans;
+=======
+    @apply antialiased bg-gray-50 text-gray-900 transition-colors duration-300 ease-in-out;
+>>>>>>> friend/main
   }
   
   .dark body {
@@ -49,12 +57,15 @@
   }
 }
 
+<<<<<<< HEAD
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+=======
+>>>>>>> friend/main
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -62,6 +73,7 @@
 }
 
 ::-webkit-scrollbar-track {
+<<<<<<< HEAD
   background: #f1f5f9;
   border-radius: 3px;
 }
@@ -73,13 +85,35 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+=======
+  @apply bg-gray-100 dark:bg-slate-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-slate-700 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-slate-600;
+>>>>>>> friend/main
 }
 
 /* Leaflet map fixes */
 .leaflet-container {
+<<<<<<< HEAD
   font-family: inherit;
 }
 
 .leaflet-popup-content-wrapper {
   border-radius: 12px;
+=======
+  height: 100%;
+  width: 100%;
+  border-radius: 0.5rem;
+  filter: var(--map-filter, none);
+}
+
+.dark .leaflet-container {
+  --map-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+>>>>>>> friend/main
 }

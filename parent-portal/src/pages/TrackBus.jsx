@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { io } from 'socket.io-client';
-import { busesAPI } from '../services/api';
-import { Bus, MapPin, RefreshCw, Circle, Clock, Navigation } from 'lucide-react';
+import { parentAPI } from '../services/api';
+import { Bus, MapPin, RefreshCw, Circle, Clock, Navigation, Users } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -14,7 +14,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-// Custom bus marker icon
 const busIcon = new L.DivIcon({
   className: 'custom-bus-marker',
   html: `
@@ -43,10 +42,9 @@ const busIcon = new L.DivIcon({
   iconAnchor: [20, 20],
 });
 
-// Component to recenter map
 function RecenterButton({ buses }) {
   const map = useMap();
-  
+
   const handleRecenter = () => {
     if (buses.length > 0) {
       const bounds = L.latLngBounds(buses.map(b => [b.latitude, b.longitude]));
@@ -65,19 +63,18 @@ function RecenterButton({ buses }) {
   );
 }
 
-export default function LiveTracking() {
-  const [buses, setBuses] = useState([]);
+export default function TrackBus() {
+  const [children, setChildren] = useState([]);
+  const [busLocations, setBusLocations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBus, setSelectedBus] = useState(null);
   const [connected, setConnected] = useState(false);
 
-  // Default center (Mumbai)
   const defaultCenter = [19.0760, 72.8777];
 
   useEffect(() => {
-    fetchBusLocations();
-    
-    // Connect to WebSocket for real-time updates
+    fetchChildrenAndBuses();
+
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
     const socketUrl = apiUrl.includes('/api/v1') ? apiUrl.replace('/api/v1', '') : apiUrl;
     
@@ -87,17 +84,15 @@ export default function LiveTracking() {
     });
 
     socket.on('connect', () => {
-      console.log('Connected to tracking server');
       setConnected(true);
     });
 
     socket.on('disconnect', () => {
-      console.log('Disconnected from tracking server');
       setConnected(false);
     });
 
     socket.on('bus-location-update', (data) => {
-      setBuses((prev) => {
+      setBusLocations((prev) => {
         const existing = prev.findIndex((b) => b.busId === data.busId);
         if (existing >= 0) {
           const updated = [...prev];
@@ -113,13 +108,40 @@ export default function LiveTracking() {
     };
   }, []);
 
-  const fetchBusLocations = async () => {
+  const fetchChildrenAndBuses = async () => {
     try {
-      const response = await busesAPI.getAllLocations();
-      setBuses(response.data?.locations || []);
+      const res = await parentAPI.getChildren();
+      const childrenData = res.data?.children || [];
+      setChildren(childrenData);
+
+      // Fetch bus locations for each child
+      const locations = [];
+      for (const child of childrenData) {
+        if (child.assignedBus) {
+          try {
+            const locRes = await parentAPI.getChildBusLocation(child._id);
+            if (locRes.data?.data) {
+              locations.push({
+                ...locRes.data.data,
+                childName: child.name,
+                busNumber: child.assignedBus.busNumber || locRes.data.data.busId?.busNumber,
+              });
+            }
+          } catch (e) {
+            // Location not available
+          }
+        }
+      }
+      
+      if (locations.length > 0) {
+        setBusLocations(locations);
+      } else {
+        setBusLocations([]);
+      }
     } catch (error) {
-      console.error('Failed to fetch bus locations:', error);
-      setBuses([]);
+      console.error('Failed to fetch data:', error);
+      setChildren([]);
+      setBusLocations([]);
     } finally {
       setLoading(false);
     }
@@ -127,37 +149,37 @@ export default function LiveTracking() {
 
   const isOnline = (lastUpdate) => {
     const diff = Date.now() - new Date(lastUpdate).getTime();
-    return diff < 5 * 60 * 1000; // 5 minutes
+    return diff < 5 * 60 * 1000;
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-4 border-black dark:border-white border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Live Tracking</h1>
-          <p className="text-gray-500 mt-1">Real-time bus location monitoring</p>
+          <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Track Bus</h1>
+          <p className="text-sm text-gray-500 mt-1">Real-time bus location for your children</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <Circle
               className={`w-3 h-3 ${connected ? 'text-green-500 fill-green-500' : 'text-red-500 fill-red-500'}`}
             />
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
               {connected ? 'Live' : 'Offline'}
             </span>
           </div>
           <button
-            onClick={fetchBusLocations}
-            className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+            onClick={fetchChildrenAndBuses}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#111] border border-gray-200 dark:border-[#222] text-black dark:text-white rounded-xl hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-sm font-medium"
           >
             <RefreshCw className="w-4 h-4" />
             Refresh
@@ -167,22 +189,22 @@ export default function LiveTracking() {
 
       {/* Map and Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Bus List Sidebar */}
+        {/* Bus List */}
         <div className="lg:col-span-1 space-y-4">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-gray-100">
-              <h3 className="font-semibold text-gray-900">Active Buses</h3>
-              <p className="text-sm text-gray-500">{buses.length} buses tracked</p>
+          <div className="bg-white dark:bg-[#111] rounded-2xl border border-gray-100 dark:border-[#222] shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-gray-100 dark:border-[#222]">
+              <h3 className="font-semibold text-black dark:text-white">Children's Buses</h3>
+              <p className="text-sm text-gray-500">{busLocations.length} buses tracked</p>
             </div>
             <div className="max-h-[500px] overflow-y-auto">
-              {buses.map((bus) => {
+              {busLocations.map((bus) => {
                 const online = isOnline(bus.lastUpdate);
                 return (
                   <button
                     key={bus.busId}
                     onClick={() => setSelectedBus(bus)}
-                    className={`w-full p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors text-left ${
-                      selectedBus?.busId === bus.busId ? 'bg-primary-50' : ''
+                    className={`w-full p-4 border-b border-gray-50 dark:border-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-left ${
+                      selectedBus?.busId === bus.busId ? 'bg-gray-50 dark:bg-[#1a1a1a]' : ''
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -197,7 +219,7 @@ export default function LiveTracking() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-gray-900">
+                          <span className="font-semibold text-black dark:text-white">
                             {bus.busNumber}
                           </span>
                           <Circle
@@ -207,11 +229,11 @@ export default function LiveTracking() {
                           />
                         </div>
                         <p className="text-xs text-gray-500 truncate">
-                          {bus.driver || 'No driver'}
+                          {bus.childName || bus.driver || 'No driver'}
                         </p>
                       </div>
                       {online && bus.speed > 0 && (
-                        <span className="text-sm font-medium text-gray-600">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                           {bus.speed} km/h
                         </span>
                       )}
@@ -224,30 +246,37 @@ export default function LiveTracking() {
 
           {/* Selected Bus Details */}
           {selectedBus && (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-              <h3 className="font-semibold text-gray-900 mb-3">Bus Details</h3>
+            <div className="bg-white dark:bg-[#111] rounded-2xl border border-gray-100 dark:border-[#222] shadow-sm p-4">
+              <h3 className="font-semibold text-black dark:text-white mb-3">Bus Details</h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm">
                   <Bus className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-600">Bus:</span>
-                  <span className="font-medium text-gray-900">{selectedBus.busNumber}</span>
+                  <span className="text-gray-500 dark:text-gray-400">Bus:</span>
+                  <span className="font-medium text-black dark:text-white">{selectedBus.busNumber}</span>
                 </div>
+                {selectedBus.childName && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Users className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-500 dark:text-gray-400">Child:</span>
+                    <span className="font-medium text-black dark:text-white">{selectedBus.childName}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-600">Location:</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="text-gray-500 dark:text-gray-400">Location:</span>
+                  <span className="font-medium text-black dark:text-white">
                     {selectedBus.latitude?.toFixed(4)}, {selectedBus.longitude?.toFixed(4)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Navigation className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-600">Speed:</span>
-                  <span className="font-medium text-gray-900">{selectedBus.speed || 0} km/h</span>
+                  <span className="text-gray-500 dark:text-gray-400">Speed:</span>
+                  <span className="font-medium text-black dark:text-white">{selectedBus.speed || 0} km/h</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-600">Last Update:</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="text-gray-500 dark:text-gray-400">Last Update:</span>
+                  <span className="font-medium text-black dark:text-white">
                     {new Date(selectedBus.lastUpdate).toLocaleTimeString()}
                   </span>
                 </div>
@@ -257,7 +286,7 @@ export default function LiveTracking() {
         </div>
 
         {/* Map */}
-        <div className="lg:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="lg:col-span-3 bg-white dark:bg-[#111] rounded-2xl border border-gray-100 dark:border-[#222] shadow-sm overflow-hidden">
           <div className="h-[600px] relative">
             <MapContainer
               center={selectedBus ? [selectedBus.latitude, selectedBus.longitude] : defaultCenter}
@@ -269,9 +298,9 @@ export default function LiveTracking() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              <RecenterButton buses={buses} />
+              <RecenterButton buses={busLocations} />
               
-              {buses.map((bus) => (
+              {busLocations.map((bus) => (
                 <Marker
                   key={bus.busId}
                   position={[bus.latitude, bus.longitude]}
@@ -283,7 +312,7 @@ export default function LiveTracking() {
                   <Popup>
                     <div className="p-2">
                       <h4 className="font-semibold text-gray-900">{bus.busNumber}</h4>
-                      <p className="text-sm text-gray-600">{bus.driver || 'No driver'}</p>
+                      <p className="text-sm text-gray-600">{bus.childName}</p>
                       <p className="text-sm text-gray-600">Speed: {bus.speed || 0} km/h</p>
                     </div>
                   </Popup>

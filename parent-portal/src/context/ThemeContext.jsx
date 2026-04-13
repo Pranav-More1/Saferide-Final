@@ -4,7 +4,10 @@ const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
   const [isDarkMode, setIsDarkMode] = useState(() => {
+<<<<<<< HEAD
     // Check local storage or system preference on initial load
+=======
+>>>>>>> friend/main
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme) {

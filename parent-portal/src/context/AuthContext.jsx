@@ -59,6 +59,10 @@ export function AuthProvider({ children }) {
     register,
     logout,
     isAuthenticated: !!user,
+<<<<<<< HEAD
+=======
+    isParent: user?.role === 'parent',
+>>>>>>> friend/main
   };
 
   return (

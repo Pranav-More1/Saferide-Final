@@ -20,6 +20,9 @@ export default {
           800: 'rgb(var(--primary-800) / <alpha-value>)',
           900: 'rgb(var(--primary-900) / <alpha-value>)',
         },
+        success: '#10b981',
+        warning: '#f59e0b',
+        danger: '#ef4444',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

@@ -35,12 +35,18 @@ export default function StudentsScreen({ navigation }) {
   const fetchStudents = async () => {
     try {
       const response = await routeAPI.getStudentsList();
+<<<<<<< HEAD
       // Backend returns { success: true, students: [...] }
       const list = response.data?.students || response.data?.data || [];
       setStudents(list);
     } catch (error) {
       console.error('Failed to fetch students:', error);
       // Show empty list — no fake data
+=======
+      setStudents(response.data?.data?.students || []);
+    } catch (error) {
+      console.error('Failed to fetch students:', error);
+>>>>>>> friend/main
       setStudents([]);
     } finally {
       setLoading(false);
@@ -94,23 +100,7 @@ export default function StudentsScreen({ navigation }) {
       Alert.alert('Success', `${student.name} - ${scanTypeDisplay} recorded`);
     } catch (error) {
       console.error('Action failed:', error);
-      // Demo mode - update locally anyway
-      const statusMapping = {
-        morning_pickup: 'morning_picked_up',
-        morning_dropoff: 'at_school',
-        evening_pickup: 'evening_picked_up',
-        evening_dropoff: 'dropped_home',
-      };
-      
-      setStudents((prev) =>
-        prev.map((s) => 
-          s._id === student._id 
-            ? { ...s, boardingStatus: statusMapping[nextScanType] } 
-            : s
-        )
-      );
-      
-      Alert.alert('Success', `${student.name} - ${scanTypeDisplay} recorded`);
+      Alert.alert('Error', 'Failed to record attendance');
     }
   };
 

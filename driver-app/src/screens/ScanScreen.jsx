@@ -93,16 +93,9 @@ export default function ScanScreen({ navigation }) {
       }
     } catch (error) {
       console.error('Scan error:', error);
-      // Demo mode - simulate successful scan
       setScanResult({
-        success: true,
-        student: {
-          _id: 'demo-1',
-          name: 'John Smith Jr.',
-          grade: '5th',
-          parentName: 'David Smith',
-        },
-        scanType: scanType,
+        success: false,
+        message: error.response?.data?.message || 'Face scanning service is offline. Please use manual attendance.',
       });
     } finally {
       setScanning(false);

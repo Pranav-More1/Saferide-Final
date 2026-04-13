@@ -88,7 +88,45 @@ router.get(
 );
 
 /**
+ * @route GET /api/v1/buses/locations
+ * @desc Get latest location for all active buses
+ * @access Admin
+ */
+router.get(
+  '/locations',
+  authorize('admin'),
+  asyncHandler(async (req, res) => {
+    // Find buses that are en_route
+    const activeBuses = await Bus.find({ status: 'en_route', isActive: true });
+    
+    // For each, get latest location
+    const locations = await Promise.all(
+      activeBuses.map(async (bus) => {
+        const location = await BusLocation.getLatestLocation(bus._id);
+        if (!location) return null;
+        return {
+          busId: bus._id,
+          busNumber: bus.busNumber,
+          driver: bus.driver,
+          latitude: location.location.coordinates[1],
+          longitude: location.location.coordinates[0],
+          speed: location.speed,
+          heading: location.heading,
+          lastUpdate: location.timestamp
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      locations: locations.filter(loc => loc !== null) // Filter out buses with no location updates yet
+    });
+  })
+);
+
+/**
  * @route GET /api/v1/buses/:id/location
+
  * @desc Get latest location for a bus
  * @access Admin, Driver, Parent (if child on bus)
  */

@@ -42,6 +42,7 @@ export default function HomeScreen({ navigation }) {
       const response = await routeAPI.getCurrentRoute();
       const data = response.data?.data || response.data || {};
       setStats({
+<<<<<<< HEAD
         totalStudents: data.totalStudents ?? 0,
         pickedUp: data.pickedUp ?? 0,
         droppedOff: data.droppedOff ?? 0,
@@ -53,6 +54,16 @@ export default function HomeScreen({ navigation }) {
       console.error('Failed to fetch route:', error);
       // Show real zeros — no fake/hardcoded data
       setStats({ totalStudents: 0, pickedUp: 0, droppedOff: 0, onBus: 0 });
+=======
+        totalStudents: response.data?.data?.totalStudents || 0,
+        pickedUp: response.data?.data?.pickedUp || 0,
+        droppedOff: response.data?.data?.droppedOff || 0,
+      });
+      setRouteActive(response.data?.data?.active || false);
+    } catch (error) {
+      console.error('Failed to fetch route:', error);
+      setStats({ totalStudents: 0, pickedUp: 0, droppedOff: 0 });
+>>>>>>> friend/main
     } finally {
       setLoading(false);
     }
@@ -96,10 +107,7 @@ export default function HomeScreen({ navigation }) {
       Alert.alert('Success', 'Route started! Location tracking is now active.');
     } catch (error) {
       console.error('Failed to start route:', error);
-      // Demo mode
-      setRouteActive(true);
-      await startLocationTracking();
-      Alert.alert('Demo Mode', 'Route started in demo mode.');
+      Alert.alert('Error', 'Failed to start route. Please try again.');
     }
   };
 

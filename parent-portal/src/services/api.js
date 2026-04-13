@@ -41,6 +41,7 @@ export const authAPI = {
   getProfile: () => api.get('/auth/profile'),
 };
 
+<<<<<<< HEAD
 // Children API (students linked to parent)
 export const childrenAPI = {
   getAll: () => api.get('/parent/children'),
@@ -61,6 +62,25 @@ export const notificationsAPI = {
   markAllRead: () => api.put('/parent/notifications/read-all'),
   getSettings: () => api.get('/parent/notification-settings'),
   updateSettings: (settings) => api.put('/parent/notification-settings', settings),
+=======
+// Parent API
+export const parentAPI = {
+  getChildren: () => api.get('/parent/children'),
+  getChild: (id) => api.get(`/parent/children/${id}`),
+  getChildHistory: (id, params) => api.get(`/parent/children/${id}/history`, { params }),
+  getChildBusLocation: (id) => api.get(`/parent/children/${id}/bus-location`),
+  getNotifications: () => api.get('/parent/notifications'),
+  markNotificationRead: (id) => api.put(`/parent/notifications/${id}/read`),
+  markAllNotificationsRead: () => api.put('/parent/notifications/read-all'),
+  getNotificationSettings: () => api.get('/parent/notification-settings'),
+  updateNotificationSettings: (data) => api.put('/parent/notification-settings', data),
+};
+
+// Scan API
+export const scanAPI = {
+  getHistory: (params) => api.get('/scan/history', { params }),
+  getStudentHistory: (studentId, params) => api.get(`/scan/history/${studentId}`, { params }),
+>>>>>>> friend/main
 };
 
 export default api;
