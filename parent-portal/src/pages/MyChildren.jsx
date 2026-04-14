@@ -31,38 +31,7 @@ export default function MyChildren() {
       setChildren(res.data?.children || []);
     } catch (error) {
       console.error('Failed to fetch children:', error);
-      setChildren([
-        {
-          _id: '1',
-          name: 'Aanya Sharma',
-          grade: '5th Grade',
-          section: 'A',
-          studentId: 'STU-001',
-          age: 10,
-          bloodGroup: 'B+',
-          attendanceStatus: 'present',
-          assignedBus: { busNumber: 'BUS-101', routeName: 'Route 4A', status: 'active', driverName: 'Rajesh Kumar' },
-          pickupPoint: 'Sector 15 Gate',
-          dropoffPoint: 'Green Valley School',
-          parentPhone: '+91 9876543210',
-          parentEmail: 'parent@example.com',
-        },
-        {
-          _id: '2',
-          name: 'Arjun Sharma',
-          grade: '3rd Grade',
-          section: 'B',
-          studentId: 'STU-002',
-          age: 8,
-          bloodGroup: 'A+',
-          attendanceStatus: 'present',
-          assignedBus: { busNumber: 'BUS-101', routeName: 'Route 4A', status: 'active', driverName: 'Rajesh Kumar' },
-          pickupPoint: 'Sector 15 Gate',
-          dropoffPoint: 'Green Valley School',
-          parentPhone: '+91 9876543210',
-          parentEmail: 'parent@example.com',
-        },
-      ]);
+      setChildren([]);
     } finally {
       setLoading(false);
     }

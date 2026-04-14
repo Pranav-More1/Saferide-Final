@@ -201,10 +201,22 @@ router.get('/children/:id/bus-location', async (req, res, next) => {
     }
 
     // Get latest bus location
-    const location = await BusLocation.findOne({ busId: child.assignedBus })
-      .sort({ timestamp: -1 })
-      .populate('busId', 'busNumber routeName')
-      .lean();
+    const location = await BusLocation.getLatestLocation(child.assignedBus);
+    
+    // Attempt to manually attach bus info since getLatestLocation leans the doc
+    if (location) {
+      const busInfo = await Bus.findById(child.assignedBus).select('busNumber routeName isActive status').lean();
+      
+      // CRITICAL LOGIC FIX: Do not load stale location points if the route is ended (inactive or completed)
+      if (!busInfo || !busInfo.isActive || busInfo.status === 'inactive' || busInfo.status === 'completed') {
+        return res.status(404).json({
+          success: false,
+          error: 'Bus is currently offline'
+        });
+      }
+      
+      location.busId = busInfo;
+    }
 
     if (!location) {
       return res.status(404).json({ 

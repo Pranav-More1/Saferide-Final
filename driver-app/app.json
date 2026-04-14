@@ -3,12 +3,7 @@
     "name": "SafeRide Driver",
     "slug": "saferide-driver",
     "version": "2.0.0",
-    "updates": {
-      "enabled": false
-    },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

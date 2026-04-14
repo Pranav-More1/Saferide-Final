@@ -317,7 +317,7 @@ async function handleLocationUpdate(io, socket, data) {
     // Broadcast to subscribers (always)
     // ==========================================
     // Real-time broadcast happens immediately
-    io.to(`bus:${busId}`).emit('location:updated', {
+    const payload = {
       busId,
       location: {
         latitude,
@@ -326,7 +326,11 @@ async function handleLocationUpdate(io, socket, data) {
         heading,
       },
       timestamp: locationData.timestamp,
-    });
+    };
+    
+    io.to(`bus:${busId}`).emit('location:updated', payload);
+    // Also broadcast to all admins
+    io.to('admins').emit('bus:location_updated', payload);
 
     // ==========================================
     // Throttled database write
@@ -482,6 +486,7 @@ async function handleStudentScan(io, socket, data) {
 
     // Notify bus room (including parents)
     io.to(`bus:${busId}`).emit('student:status-changed', eventData);
+    io.to('admins').emit('student:status-changed', eventData);
 
     // Direct notification to parents
     for (const parent of student.parents || []) {

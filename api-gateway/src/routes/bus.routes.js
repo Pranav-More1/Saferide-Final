@@ -64,30 +64,6 @@ router.post(
 );
 
 /**
- * @route GET /api/v1/buses/:id
- * @desc Get bus by ID
- * @access Admin, Driver
- */
-router.get(
-  '/:id',
-  authorize('admin', 'driver'),
-  asyncHandler(async (req, res) => {
-    const bus = await Bus.findById(req.params.id)
-      .populate('driver', 'name email phone')
-      .populate('studentCount');
-
-    if (!bus) {
-      throw new ApiError(404, 'Bus not found');
-    }
-
-    res.json({
-      success: true,
-      data: bus,
-    });
-  })
-);
-
-/**
  * @route GET /api/v1/buses/locations
  * @desc Get latest location for all active buses
  * @access Admin
@@ -96,8 +72,11 @@ router.get(
   '/locations',
   authorize('admin'),
   asyncHandler(async (req, res) => {
-    // Find buses that are en_route
-    const activeBuses = await Bus.find({ status: 'en_route', isActive: true });
+    // Find buses that are actively driving
+    const activeBuses = await Bus.find({ 
+      status: { $in: ['en_route', 'at_stop', 'returning'] }, 
+      isActive: true 
+    });
     
     // For each, get latest location
     const locations = await Promise.all(
@@ -123,6 +102,31 @@ router.get(
     });
   })
 );
+
+/**
+ * @route GET /api/v1/buses/:id
+ * @desc Get bus by ID
+ * @access Admin, Driver
+ */
+router.get(
+  '/:id',
+  authorize('admin', 'driver'),
+  asyncHandler(async (req, res) => {
+    const bus = await Bus.findById(req.params.id)
+      .populate('driver', 'name email phone')
+      .populate('studentCount');
+
+    if (!bus) {
+      throw new ApiError(404, 'Bus not found');
+    }
+
+    res.json({
+      success: true,
+      data: bus,
+    });
+  })
+);
+
 
 /**
  * @route GET /api/v1/buses/:id/location

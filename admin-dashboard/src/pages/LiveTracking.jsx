@@ -78,12 +78,14 @@ export default function LiveTracking() {
     fetchBusLocations();
     
     // Connect to WebSocket for real-time updates
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
     const socketUrl = apiUrl.includes('/api/v1') ? apiUrl.replace('/api/v1', '') : apiUrl;
+    const token = localStorage.getItem('token');
     
     const socket = io(socketUrl, {
       transports: ['websocket'],
       path: '/socket.io',
+      auth: { token }
     });
 
     socket.on('connect', () => {
@@ -96,16 +98,38 @@ export default function LiveTracking() {
       setConnected(false);
     });
 
-    socket.on('bus-location-update', (data) => {
+    socket.on('bus:location_updated', (data) => {
       setBuses((prev) => {
         const existing = prev.findIndex((b) => b.busId === data.busId);
         if (existing >= 0) {
           const updated = [...prev];
-          updated[existing] = { ...updated[existing], ...data };
+          updated[existing] = { 
+            ...updated[existing], 
+            latitude: data.location?.latitude || data.latitude, 
+            longitude: data.location?.longitude || data.longitude,
+            speed: data.location?.speed || data.speed || 0,
+            lastUpdate: data.timestamp
+          };
           return updated;
         }
-        return [...prev, data];
+        return [...prev, {
+          busId: data.busId,
+          busNumber: data.busNumber || 'Bus ' + data.busId.substring(0, 4),
+          driver: data.driver || null,
+          latitude: data.location?.latitude || data.latitude,
+          longitude: data.location?.longitude || data.longitude,
+          speed: data.location?.speed || data.speed || 0,
+          lastUpdate: data.timestamp
+        }];
       });
+    });
+
+    socket.on('bus:status_changed', (data) => {
+      if (data.status === 'completed' || data.status === 'maintenance') {
+        // Remove bus from tracking map
+        setBuses((prev) => prev.filter(b => b.busId !== data.busId));
+        setSelectedBus((prev) => prev?.busId === data.busId ? null : prev);
+      }
     });
 
     return () => {
@@ -126,8 +150,7 @@ export default function LiveTracking() {
   };
 
   const isOnline = (lastUpdate) => {
-    const diff = Date.now() - new Date(lastUpdate).getTime();
-    return diff < 5 * 60 * 1000; // 5 minutes
+    return true; // Mathematical parity with the backend: if it exists, it's definitively En Route.
   };
 
   if (loading) {
@@ -211,8 +234,8 @@ export default function LiveTracking() {
                         </p>
                       </div>
                       {online && bus.speed > 0 && (
-                        <span className="text-sm font-medium text-gray-600">
-                          {bus.speed} km/h
+                        <span className="text-sm font-medium text-gray-600 truncate ml-2">
+                          {Math.round(bus.speed)} km/h
                         </span>
                       )}
                     </div>

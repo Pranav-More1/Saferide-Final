@@ -41,28 +41,6 @@ export const authAPI = {
   getProfile: () => api.get('/auth/profile'),
 };
 
-<<<<<<< HEAD
-// Children API (students linked to parent)
-export const childrenAPI = {
-  getAll: () => api.get('/parent/children'),
-  getById: (id) => api.get(`/parent/children/${id}`),
-  getHistory: (id, params) => api.get(`/parent/children/${id}/history`, { params }),
-};
-
-// Bus tracking API
-export const trackingAPI = {
-  getBusLocation: (busId) => api.get(`/buses/${busId}/location`),
-  getChildBusLocation: (childId) => api.get(`/parent/children/${childId}/bus-location`),
-};
-
-// Notifications API
-export const notificationsAPI = {
-  getAll: () => api.get('/parent/notifications'),
-  markRead: (id) => api.put(`/parent/notifications/${id}/read`),
-  markAllRead: () => api.put('/parent/notifications/read-all'),
-  getSettings: () => api.get('/parent/notification-settings'),
-  updateSettings: (settings) => api.put('/parent/notification-settings', settings),
-=======
 // Parent API
 export const parentAPI = {
   getChildren: () => api.get('/parent/children'),
@@ -80,7 +58,6 @@ export const parentAPI = {
 export const scanAPI = {
   getHistory: (params) => api.get('/scan/history', { params }),
   getStudentHistory: (studentId, params) => api.get(`/scan/history/${studentId}`, { params }),
->>>>>>> friend/main
 };
 
 export default api;

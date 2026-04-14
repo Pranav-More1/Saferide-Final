@@ -30,10 +30,6 @@ import busRoutes from './routes/bus.routes.js';
 import scanRoutes from './routes/scan.routes.js';
 import userRoutes from './routes/user.routes.js';
 import parentRoutes from './routes/parent.routes.js';
-<<<<<<< HEAD
-=======
-import dashboardRoutes from './routes/dashboard.routes.js';
->>>>>>> friend/main
 import driverRoutes from './routes/driver.routes.js';
 
 // ============================================
@@ -103,10 +99,6 @@ app.use(`${apiPrefix}/buses`, busRoutes);
 app.use(`${apiPrefix}/scan`, scanRoutes);
 app.use(`${apiPrefix}/users`, userRoutes);
 app.use(`${apiPrefix}/parent`, parentRoutes);
-<<<<<<< HEAD
-=======
-app.use(`${apiPrefix}/dashboard`, dashboardRoutes);
->>>>>>> friend/main
 app.use(`${apiPrefix}/driver`, driverRoutes);
 
 // ============================================

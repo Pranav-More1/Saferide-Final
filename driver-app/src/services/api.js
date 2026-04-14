@@ -1,11 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-<<<<<<< HEAD
 const API_URL = 'http://10.247.122.203:3000/api/v1'; // Your computer's IP for physical device
-=======
-const API_URL = 'http://10.102.139.31:3000/api/v1'; // Your computer's IP for physical device
->>>>>>> friend/main
 
 const api = axios.create({
   baseURL: API_URL,

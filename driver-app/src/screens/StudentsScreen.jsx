@@ -35,19 +35,13 @@ export default function StudentsScreen({ navigation }) {
   const fetchStudents = async () => {
     try {
       const response = await routeAPI.getStudentsList();
-<<<<<<< HEAD
       // Backend returns { success: true, students: [...] }
       const list = response.data?.students || response.data?.data || [];
       setStudents(list);
     } catch (error) {
       console.error('Failed to fetch students:', error);
-      // Show empty list — no fake data
-=======
-      setStudents(response.data?.data?.students || []);
-    } catch (error) {
-      console.error('Failed to fetch students:', error);
->>>>>>> friend/main
       setStudents([]);
+
     } finally {
       setLoading(false);
     }

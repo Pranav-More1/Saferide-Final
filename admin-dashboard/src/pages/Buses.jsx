@@ -45,16 +45,8 @@ export default function Buses() {
     } catch (error) {
       console.error('Failed to fetch data:', error);
       // Mock data
-      setBuses([
-        { _id: '1', busNumber: 'BUS-101', licensePlate: 'ABC-1234', capacity: 40, driver: { name: 'Robert Johnson' }, route: 'North Route', status: 'active' },
-        { _id: '2', busNumber: 'BUS-102', licensePlate: 'DEF-5678', capacity: 35, driver: { name: 'Maria Garcia' }, route: 'South Route', status: 'active' },
-        { _id: '3', busNumber: 'BUS-103', licensePlate: 'GHI-9012', capacity: 45, driver: null, route: 'East Route', status: 'inactive' },
-      ]);
-      setDrivers([
-        { _id: '1', name: 'Robert Johnson' },
-        { _id: '2', name: 'Maria Garcia' },
-        { _id: '3', name: 'James Williams' },
-      ]);
+      setBuses([]);
+      setDrivers([]);
     } finally {
       setLoading(false);
     }

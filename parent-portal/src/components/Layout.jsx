@@ -8,18 +8,6 @@ import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 import {
-<<<<<<< HEAD
-  Home,
-  Users,
-  MapPin,
-  Clock,
-  LogOut,
-  Menu,
-  X,
-  Bell,
-  Shield,
-  Settings,
-=======
   LayoutDashboard,
   Users,
   MapPin,
@@ -29,23 +17,15 @@ import {
   Menu,
   X,
   Heart,
->>>>>>> friend/main
   Sun,
   Moon
 } from 'lucide-react';
 
 const navigation = [
-<<<<<<< HEAD
-  { name: 'Home', href: '/', icon: Home },
-  { name: 'My Children', href: '/children', icon: Users },
-  { name: 'Live Tracking', href: '/tracking', icon: MapPin },
-  { name: 'History', href: '/history', icon: Clock },
-=======
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'My Children', href: '/children', icon: Users },
   { name: 'Track Bus', href: '/tracking', icon: MapPin },
   { name: 'Attendance', href: '/attendance', icon: History },
->>>>>>> friend/main
   { name: 'Notifications', href: '/notifications', icon: Bell },
 ];
 
@@ -60,10 +40,6 @@ export default function Layout({ children }) {
   const headerRef = useRef(null);
 
   useGSAP(() => {
-<<<<<<< HEAD
-    // Initial mount animations for desktop
-=======
->>>>>>> friend/main
     if (window.innerWidth >= 1024) {
       gsap.from(sidebarRef.current, {
         x: -50,
@@ -96,11 +72,7 @@ export default function Layout({ children }) {
         />
       )}
 
-<<<<<<< HEAD
-      {/* Sidebar - Hover Expandable on Desktop */}
-=======
       {/* Sidebar */}
->>>>>>> friend/main
       <aside
         ref={sidebarRef}
         className={twMerge(
@@ -112,11 +84,7 @@ export default function Layout({ children }) {
           {/* Logo */}
           <div className="flex items-center px-5 py-6 border-b border-gray-200 dark:border-[#222]">
             <div className="w-10 h-10 shrink-0 rounded-xl bg-black dark:bg-white flex items-center justify-center">
-<<<<<<< HEAD
-              <Shield className="w-5 h-5 text-white dark:text-black" />
-=======
               <Heart className="w-5 h-5 text-white dark:text-black" />
->>>>>>> friend/main
             </div>
             <div className="ml-3 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden">
               <h1 className="font-bold text-black dark:text-white text-lg tracking-tight whitespace-nowrap">SafeRide</h1>
@@ -206,11 +174,7 @@ export default function Layout({ children }) {
                 <nav className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 font-medium">
                   <span className="text-black dark:text-white font-bold">Parent Portal</span>
                   <span>/</span>
-<<<<<<< HEAD
-                  <span className="capitalize">{location.pathname === '/' ? 'Home' : location.pathname.substring(1)}</span>
-=======
                   <span className="capitalize">{location.pathname === '/' ? 'Dashboard' : location.pathname.substring(1)}</span>
->>>>>>> friend/main
                 </nav>
               </div>
             </div>
@@ -226,17 +190,6 @@ export default function Layout({ children }) {
               </button>
               
               {/* Notifications */}
-<<<<<<< HEAD
-              <Link to="/notifications" className="relative p-2 text-gray-500 hover:text-black dark:hover:text-white bg-gray-50 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#333] rounded-full transition-all duration-300 border border-gray-200 dark:border-[#333]">
-                <Bell className="w-4 h-4" />
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-black dark:bg-white border-2 border-white dark:border-[#1a1a1a] rounded-full" />
-              </Link>
-
-              {/* Settings */}
-              <Link to="/settings" className="p-2 text-gray-500 hover:text-black dark:hover:text-white bg-gray-50 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#333] rounded-full transition-all duration-300 border border-gray-200 dark:border-[#333]">
-                <Settings className="w-4 h-4" />
-              </Link>
-=======
               <Link 
                 to="/notifications"
                 className="relative p-2 text-gray-500 hover:text-black dark:hover:text-white bg-gray-50 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#333] rounded-full transition-all duration-300 border border-gray-200 dark:border-[#333]"
@@ -244,7 +197,6 @@ export default function Layout({ children }) {
                 <Bell className="w-4 h-4" />
                 <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-black dark:bg-white border-2 border-white dark:border-[#1a1a1a] rounded-full" />
               </Link>
->>>>>>> friend/main
             </div>
           </div>
         </header>

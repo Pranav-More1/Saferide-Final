@@ -20,6 +20,7 @@ import { format } from 'date-fns';
 
 export default function Dashboard() {
   const [children, setChildren] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef(null);
 
@@ -29,33 +30,14 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     try {
-      const res = await parentAPI.getChildren();
-      setChildren(res.data?.children || []);
-    } catch (error) {
-      console.error('Failed to fetch children:', error);
-      // Mock data for demo
-      setChildren([
-        {
-          _id: '1',
-          name: 'Aanya Sharma',
-          grade: '5th Grade',
-          section: 'A',
-          studentId: 'STU-001',
-          attendanceStatus: 'present',
-          assignedBus: { busNumber: 'BUS-101', routeName: 'Route 4A', status: 'active', driverName: 'Rajesh Kumar' },
-          lastScan: { type: 'boarding', timestamp: new Date(Date.now() - 3600000) }
-        },
-        {
-          _id: '2',
-          name: 'Arjun Sharma',
-          grade: '3rd Grade',
-          section: 'B',
-          studentId: 'STU-002',
-          attendanceStatus: 'present',
-          assignedBus: { busNumber: 'BUS-101', routeName: 'Route 4A', status: 'active', driverName: 'Rajesh Kumar' },
-          lastScan: { type: 'alighting', timestamp: new Date(Date.now() - 1800000) }
-        },
+      const [res, notifRes] = await Promise.all([
+        parentAPI.getChildren(),
+        parentAPI.getNotifications()
       ]);
+      setChildren(res.data?.children || []);
+      setNotifications(notifRes.data?.data || []);
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
     } finally {
       setLoading(false);
     }
@@ -204,25 +186,29 @@ export default function Dashboard() {
           </h3>
           
           <div className="space-y-4 mb-8">
-            <div className="bg-[#1a1a1a] dark:bg-white rounded-2xl p-4 flex gap-4 border border-[#333] dark:border-gray-200 shadow-sm transition-colors cursor-pointer group">
-               <div className="p-2 sm:p-2.5 bg-[#333] dark:bg-gray-100 text-white dark:text-black rounded-xl h-fit border border-[#444] dark:border-gray-200 shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-                  <CheckCircle2 className="w-5 h-5"/>
-               </div>
-               <div className="min-w-0">
-                  <h4 className="font-bold text-sm truncate">All Children Safe</h4>
-                  <p className="text-xs text-gray-400 dark:text-gray-600 mt-1.5 leading-relaxed line-clamp-2">All your children have been safely scanned today. Attendance records are up to date.</p>
-               </div>
-            </div>
-            
-            <div className="bg-[#1a1a1a] dark:bg-white rounded-2xl p-4 flex gap-4 border border-[#333] dark:border-gray-200 shadow-sm transition-colors cursor-pointer group">
-               <div className="p-2 sm:p-2.5 bg-[#333] dark:bg-gray-100 text-white dark:text-black rounded-xl h-fit border border-[#444] dark:border-gray-200 shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-                  <Clock className="w-5 h-5"/>
-               </div>
-               <div className="min-w-0">
-                  <h4 className="font-bold text-sm truncate">Bus ETA Update</h4>
-                  <p className="text-xs text-gray-400 dark:text-gray-600 mt-1.5 leading-relaxed line-clamp-2">BUS-101 is currently on route. Expected arrival at your stop in approximately 15 minutes.</p>
-               </div>
-            </div>
+            {notifications.length > 0 ? (
+              notifications.slice(0, 2).map(notif => (
+                <div key={notif._id} className="bg-[#1a1a1a] dark:bg-white rounded-2xl p-4 flex gap-4 border border-[#333] dark:border-gray-200 shadow-sm transition-colors cursor-pointer group">
+                  <div className="p-2 sm:p-2.5 bg-[#333] dark:bg-gray-100 text-white dark:text-black rounded-xl h-fit border border-[#444] dark:border-gray-200 shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                    {notif.type === 'boarding' ? <CheckCircle2 className="w-5 h-5"/> : <AlertTriangle className="w-5 h-5"/>}
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-sm truncate">{notif.title}</h4>
+                    <p className="text-xs text-gray-400 dark:text-gray-600 mt-1.5 leading-relaxed line-clamp-2">{notif.message}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+                <div className="bg-[#1a1a1a] dark:bg-white rounded-2xl p-4 flex gap-4 border border-[#333] dark:border-gray-200 shadow-sm transition-colors cursor-pointer group">
+                  <div className="p-2 sm:p-2.5 bg-[#333] dark:bg-gray-100 text-white dark:text-black rounded-xl h-fit border border-[#444] dark:border-gray-200 shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                    <CheckCircle2 className="w-5 h-5"/>
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-sm truncate">All Quiet</h4>
+                    <p className="text-xs text-gray-400 dark:text-gray-600 mt-1.5 leading-relaxed line-clamp-2">There are no recent alerts. Everything is running smoothly.</p>
+                  </div>
+                </div>
+            )}
           </div>
 
           <div className="mt-auto">

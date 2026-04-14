@@ -37,27 +37,13 @@ export default function AttendanceHistory() {
       }
     } catch (error) {
       console.error('Failed to fetch children:', error);
-      const mockChildren = [
-        { _id: '1', name: 'Aanya Sharma', grade: '5th Grade', studentId: 'STU-001' },
-        { _id: '2', name: 'Arjun Sharma', grade: '3rd Grade', studentId: 'STU-002' },
-      ];
-      setChildren(mockChildren);
-      setSelectedChild(mockChildren[0]);
-      setHistory(getMockHistory());
+      setChildren([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const getMockHistory = () => [
-    { _id: '1', date: new Date().toISOString(), status: 'present', boardingTime: new Date(Date.now() - 7200000).toISOString(), alightingTime: new Date(Date.now() - 3600000).toISOString(), busNumber: 'BUS-101' },
-    { _id: '2', date: new Date(Date.now() - 86400000).toISOString(), status: 'present', boardingTime: new Date(Date.now() - 86400000 - 7200000).toISOString(), alightingTime: new Date(Date.now() - 86400000 - 3600000).toISOString(), busNumber: 'BUS-101' },
-    { _id: '3', date: new Date(Date.now() - 172800000).toISOString(), status: 'absent', boardingTime: null, alightingTime: null, busNumber: 'BUS-101' },
-    { _id: '4', date: new Date(Date.now() - 259200000).toISOString(), status: 'present', boardingTime: new Date(Date.now() - 259200000 - 7200000).toISOString(), alightingTime: new Date(Date.now() - 259200000 - 3600000).toISOString(), busNumber: 'BUS-101' },
-    { _id: '5', date: new Date(Date.now() - 345600000).toISOString(), status: 'present', boardingTime: new Date(Date.now() - 345600000 - 7200000).toISOString(), alightingTime: new Date(Date.now() - 345600000 - 3600000).toISOString(), busNumber: 'BUS-101' },
-    { _id: '6', date: new Date(Date.now() - 432000000).toISOString(), status: 'present', boardingTime: new Date(Date.now() - 432000000 - 7200000).toISOString(), alightingTime: null, busNumber: 'BUS-101' },
-    { _id: '7', date: new Date(Date.now() - 518400000).toISOString(), status: 'absent', boardingTime: null, alightingTime: null, busNumber: 'BUS-101' },
-  ];
+
 
   const fetchHistory = async (childId) => {
     setHistoryLoading(true);
@@ -66,7 +52,7 @@ export default function AttendanceHistory() {
       setHistory(res.data?.data || []);
     } catch (error) {
       console.error('Failed to fetch history:', error);
-      setHistory(getMockHistory());
+      setHistory([]);
     } finally {
       setHistoryLoading(false);
     }

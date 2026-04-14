@@ -1,15 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
-<<<<<<< HEAD
-import { ThemeProvider } from './context/ThemeContext';
-import Layout from './components/Layout';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Home from './pages/Home';
-import LiveTracking from './pages/LiveTracking';
-import History from './pages/History';
-=======
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -17,7 +8,6 @@ import Dashboard from './pages/Dashboard';
 import MyChildren from './pages/MyChildren';
 import TrackBus from './pages/TrackBus';
 import AttendanceHistory from './pages/AttendanceHistory';
->>>>>>> friend/main
 import Notifications from './pages/Notifications';
 
 // Protected Route wrapper
@@ -39,11 +29,7 @@ function ProtectedRoute({ children }) {
   return <Layout>{children}</Layout>;
 }
 
-<<<<<<< HEAD
-// Public Route wrapper
-=======
 // Public Route wrapper (redirects if already authenticated)
->>>>>>> friend/main
 function PublicRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
 
@@ -88,11 +74,7 @@ function AppRoutes() {
         path="/"
         element={
           <ProtectedRoute>
-<<<<<<< HEAD
-            <Home />
-=======
             <Dashboard />
->>>>>>> friend/main
           </ProtectedRoute>
         }
       />
@@ -100,11 +82,7 @@ function AppRoutes() {
         path="/children"
         element={
           <ProtectedRoute>
-<<<<<<< HEAD
-            <Home />
-=======
             <MyChildren />
->>>>>>> friend/main
           </ProtectedRoute>
         }
       />
@@ -112,26 +90,15 @@ function AppRoutes() {
         path="/tracking"
         element={
           <ProtectedRoute>
-<<<<<<< HEAD
-            <LiveTracking />
-=======
             <TrackBus />
->>>>>>> friend/main
           </ProtectedRoute>
         }
       />
       <Route
-<<<<<<< HEAD
-        path="/history"
-        element={
-          <ProtectedRoute>
-            <History />
-=======
         path="/attendance"
         element={
           <ProtectedRoute>
             <AttendanceHistory />
->>>>>>> friend/main
           </ProtectedRoute>
         }
       />
@@ -152,14 +119,8 @@ function AppRoutes() {
 
 export default function App() {
   return (
-<<<<<<< HEAD
-    <ThemeProvider>
-      <BrowserRouter>
-        <AuthProvider>
-=======
     <BrowserRouter>
       <AuthProvider>
->>>>>>> friend/main
         <AppRoutes />
         <Toaster
           position="top-right"
@@ -171,11 +132,7 @@ export default function App() {
             },
             success: {
               iconTheme: {
-<<<<<<< HEAD
-                primary: '#22C55E',
-=======
                 primary: '#10B981',
->>>>>>> friend/main
                 secondary: '#fff',
               },
             },
@@ -189,9 +146,5 @@ export default function App() {
         />
       </AuthProvider>
     </BrowserRouter>
-<<<<<<< HEAD
-    </ThemeProvider>
-=======
->>>>>>> friend/main
   );
 }

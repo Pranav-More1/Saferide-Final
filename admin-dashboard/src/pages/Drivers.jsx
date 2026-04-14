@@ -41,12 +41,7 @@ export default function Drivers() {
       setDrivers(response.data?.drivers || []);
     } catch (error) {
       console.error('Failed to fetch drivers:', error);
-      // Mock data
-      setDrivers([
-        { _id: '1', name: 'Robert Johnson', email: 'robert@email.com', phone: '555-0201', licenseNumber: 'DL-12345', status: 'active' },
-        { _id: '2', name: 'Maria Garcia', email: 'maria@email.com', phone: '555-0202', licenseNumber: 'DL-67890', status: 'active' },
-        { _id: '3', name: 'James Williams', email: 'james@email.com', phone: '555-0203', licenseNumber: 'DL-11111', status: 'inactive' },
-      ]);
+      setDrivers([]);
     } finally {
       setLoading(false);
     }

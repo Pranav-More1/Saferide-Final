@@ -11,7 +11,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import { routeAPI, locationAPI } from '../services/api';
 
@@ -42,7 +41,6 @@ export default function HomeScreen({ navigation }) {
       const response = await routeAPI.getCurrentRoute();
       const data = response.data?.data || response.data || {};
       setStats({
-<<<<<<< HEAD
         totalStudents: data.totalStudents ?? 0,
         pickedUp: data.pickedUp ?? 0,
         droppedOff: data.droppedOff ?? 0,
@@ -52,18 +50,7 @@ export default function HomeScreen({ navigation }) {
       setBusInfo(data.bus || null);
     } catch (error) {
       console.error('Failed to fetch route:', error);
-      // Show real zeros — no fake/hardcoded data
       setStats({ totalStudents: 0, pickedUp: 0, droppedOff: 0, onBus: 0 });
-=======
-        totalStudents: response.data?.data?.totalStudents || 0,
-        pickedUp: response.data?.data?.pickedUp || 0,
-        droppedOff: response.data?.data?.droppedOff || 0,
-      });
-      setRouteActive(response.data?.data?.active || false);
-    } catch (error) {
-      console.error('Failed to fetch route:', error);
-      setStats({ totalStudents: 0, pickedUp: 0, droppedOff: 0 });
->>>>>>> friend/main
     } finally {
       setLoading(false);
     }
@@ -166,7 +153,11 @@ export default function HomeScreen({ navigation }) {
           <View>
             <Text style={styles.greeting}>Hello, {user?.name?.split(' ')[0] || 'Driver'}!</Text>
             <Text style={styles.subGreeting}>
-              {busInfo ? `Bus ${busInfo.busNumber} · ${busInfo.routeName}` : (routeActive ? 'Route in progress' : 'Ready to start your route?')}
+              {busInfo
+                ? `Bus ${busInfo.busNumber} · ${busInfo.routeName}`
+                : routeActive
+                ? 'Route in progress'
+                : 'Ready to start your route?'}
             </Text>
           </View>
           <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
@@ -325,13 +316,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 20,
     marginTop: 20,
-    gap: 12,
+    gap: 8,
   },
   statCard: {
     flex: 1,
     backgroundColor: '#fff',
     borderRadius: 16,
-    padding: 16,
+    padding: 12,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -340,22 +331,22 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   statIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   statNumber: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#1F2937',
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#6B7280',
-    marginTop: 4,
+    marginTop: 2,
   },
   actionsContainer: {
     paddingHorizontal: 20,

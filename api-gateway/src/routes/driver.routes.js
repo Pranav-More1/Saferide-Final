@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * ============================================
  * GuardianSync v2.0 - Driver Routes
@@ -31,11 +30,9 @@ router.use(authorize('driver', 'admin'));
 router.get(
   '/route',
   asyncHandler(async (req, res) => {
-    // Find the bus assigned to this driver
     const bus = await Bus.findOne({ driver: req.user._id, isActive: true }).lean();
 
     if (!bus) {
-      // No bus assigned — return graceful empty state
       return res.json({
         success: true,
         data: {
@@ -49,28 +46,22 @@ router.get(
       });
     }
 
-    // Count all active students on this bus
     const totalStudents = await Student.countDocuments({
       assignedBus: bus._id,
       isActive: true,
     });
 
-    // Get today's attendance counts from boardingStatus field
-    // boardingStatus values: not_boarded | morning_picked_up | at_school | evening_picked_up | dropped_home | absent
     const [pickedUpCount, droppedOffCount, onBusCount] = await Promise.all([
-      // Picked up = ever boarded today (morning_picked_up, at_school, evening_picked_up, dropped_home)
       Student.countDocuments({
         assignedBus: bus._id,
         isActive: true,
         boardingStatus: { $in: ['morning_picked_up', 'at_school', 'evening_picked_up', 'dropped_home'] },
       }),
-      // Dropped off at school = at_school or beyond
       Student.countDocuments({
         assignedBus: bus._id,
         isActive: true,
         boardingStatus: { $in: ['at_school', 'evening_picked_up', 'dropped_home'] },
       }),
-      // Currently on bus = morning_picked_up or evening_picked_up
       Student.countDocuments({
         assignedBus: bus._id,
         isActive: true,
@@ -78,7 +69,6 @@ router.get(
       }),
     ]);
 
-    // Bus is "active" when it's en_route, at_stop, or returning
     const activeStatuses = ['en_route', 'at_stop', 'returning'];
     const isActive = activeStatuses.includes(bus.status);
 
@@ -118,7 +108,6 @@ router.get(
       .select('name studentId grade section photoUrl boardingStatus pickupLocation lastBoardingEvent')
       .lean();
 
-    // Normalize for the mobile app
     const normalized = students.map((s) => ({
       _id: s._id,
       name: s.name,
@@ -140,7 +129,6 @@ router.get(
 
 // ============================================
 // POST /api/v1/driver/route/start
-// Sets bus status to en_route
 // ============================================
 router.post(
   '/route/start',
@@ -170,7 +158,6 @@ router.post(
 
 // ============================================
 // POST /api/v1/driver/route/end
-// Sets bus status to completed
 // ============================================
 router.post(
   '/route/end',
@@ -200,7 +187,6 @@ router.post(
 
 // ============================================
 // POST /api/v1/driver/location
-// Saves GPS coordinates and broadcasts to parent clients
 // ============================================
 router.post(
   '/location',
@@ -221,50 +207,31 @@ router.post(
       bus: bus._id,
       location: {
         type: 'Point',
-        coordinates: [longitude, latitude], // GeoJSON: [lng, lat]
+        coordinates: [longitude, latitude],
       },
       speed: speed || 0,
       heading: heading || 0,
       timestamp: new Date(),
     });
 
-    // Broadcast real-time location to parents subscribed to this bus
     const io = req.app.locals.io;
     if (io) {
-      io.to(`bus:${bus._id}`).emit('bus:location_updated', {
+      const payload = {
         busId: bus._id,
+        busNumber: bus.busNumber,
+        driver: req.user.name,
         latitude,
         longitude,
         speed: speed || 0,
         heading: heading || 0,
         timestamp: locationRecord.timestamp,
-      });
+      };
+      io.to(`bus:${bus._id}`).emit('bus:location_updated', payload);
+      io.to('admins').emit('bus:location_updated', payload);
     }
 
     res.json({ success: true, message: 'Location updated' });
   })
 );
-=======
-import { Router } from 'express';
-import { 
-  getCurrentRoute, 
-  getStudentsList, 
-  startRoute, 
-  endRoute, 
-  updateLocation 
-} from '../controllers/driver.controller.js';
-import { authenticate, authorize } from '../middleware/auth.js';
-
-const router = Router();
-
-// Only drivers can access these endpoints
-router.use(authenticate, authorize('driver'));
-
-router.get('/route', getCurrentRoute);
-router.get('/students', getStudentsList);
-router.post('/route/start', startRoute);
-router.post('/route/end', endRoute);
-router.post('/location', updateLocation);
->>>>>>> friend/main
 
 export default router;

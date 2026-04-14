@@ -56,19 +56,15 @@ export default function Dashboard() {
       console.error('Failed to fetch dashboard data:', error);
       // Use mock data if API fails
       setStats({
-        students: 2350,
-        drivers: 45,
-        buses: 38,
-        activeRoutes: 24,
-        scansToday: 4200,
-        pickups: 1850,
-        dropoffs: 1720,
+        students: 0,
+        drivers: 0,
+        buses: 0,
+        activeRoutes: 0,
+        scansToday: 0,
+        pickups: 0,
+        dropoffs: 0,
       });
-      setActivity([
-        { id: 1, type: 'pickup', student: 'John Smith', time: new Date(), bus: 'Bus 101' },
-        { id: 2, type: 'dropoff', student: 'Emma Wilson', time: new Date(Date.now() - 300000), bus: 'Bus 102' },
-        { id: 3, type: 'pickup', student: 'Michael Brown', time: new Date(Date.now() - 600000), bus: 'Bus 103' },
-      ]);
+      setActivity([]);
     } finally {
       setLoading(false);
     }
@@ -237,25 +233,27 @@ export default function Dashboard() {
           </h3>
           
           <div className="space-y-4 mb-8">
-            <div className="bg-[#1a1a1a] dark:bg-white rounded-2xl p-4 flex gap-4 border border-[#333] dark:border-gray-200 shadow-sm transition-colors cursor-pointer group">
-               <div className="p-2 sm:p-2.5 bg-[#333] dark:bg-gray-100 text-white dark:text-black rounded-xl h-fit border border-[#444] dark:border-gray-200 shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-                  <AlertTriangle className="w-5 h-5"/>
-               </div>
-               <div className="min-w-0">
-                  <h4 className="font-bold text-sm truncate">Pending Scans Alert</h4>
-                  <p className="text-xs text-gray-400 dark:text-gray-600 mt-1.5 leading-relaxed line-clamp-2">There are {pendingScans} pending scans recorded today. Please verify manual overrides if needed.</p>
-               </div>
-            </div>
-            
-            <div className="bg-[#1a1a1a] dark:bg-white rounded-2xl p-4 flex gap-4 border border-[#333] dark:border-gray-200 shadow-sm transition-colors cursor-pointer group">
-               <div className="p-2 sm:p-2.5 bg-[#333] dark:bg-gray-100 text-white dark:text-black rounded-xl h-fit border border-[#444] dark:border-gray-200 shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-                  <Clock className="w-5 h-5"/>
-               </div>
-               <div className="min-w-0">
-                  <h4 className="font-bold text-sm truncate">Bus 102 Delay</h4>
-                  <p className="text-xs text-gray-400 dark:text-gray-600 mt-1.5 leading-relaxed line-clamp-2">Driver reported minor traffic delay on route 4A. Expected arrival has slipped by +15m.</p>
-               </div>
-            </div>
+            {pendingScans > 0 ? (
+              <div className="bg-[#1a1a1a] dark:bg-white rounded-2xl p-4 flex gap-4 border border-[#333] dark:border-gray-200 shadow-sm transition-colors cursor-pointer group">
+                 <div className="p-2 sm:p-2.5 bg-[#333] dark:bg-gray-100 text-white dark:text-black rounded-xl h-fit border border-[#444] dark:border-gray-200 shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                    <AlertTriangle className="w-5 h-5"/>
+                 </div>
+                 <div className="min-w-0">
+                    <h4 className="font-bold text-sm truncate">Pending Scans Alert</h4>
+                    <p className="text-xs text-gray-400 dark:text-gray-600 mt-1.5 leading-relaxed line-clamp-2">There are {pendingScans} pending scans recorded today. Please verify manual overrides if needed.</p>
+                 </div>
+              </div>
+            ) : (
+                <div className="bg-[#1a1a1a] dark:bg-white rounded-2xl p-4 flex gap-4 border border-[#333] dark:border-gray-200 shadow-sm transition-colors cursor-pointer group">
+                  <div className="p-2 sm:p-2.5 bg-[#333] dark:bg-gray-100 text-white dark:text-black rounded-xl h-fit border border-[#444] dark:border-gray-200 shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                    <CheckCircle2 className="w-5 h-5"/>
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-sm truncate">All Clear</h4>
+                    <p className="text-xs text-gray-400 dark:text-gray-600 mt-1.5 leading-relaxed line-clamp-2">No system alerts currently. The fleet is operating normally.</p>
+                  </div>
+                </div>
+            )}
           </div>
 
           <div className="mt-auto">

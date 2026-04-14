@@ -75,12 +75,14 @@ export default function TrackBus() {
   useEffect(() => {
     fetchChildrenAndBuses();
 
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     const socketUrl = apiUrl.includes('/api/v1') ? apiUrl.replace('/api/v1', '') : apiUrl;
     
+    const token = localStorage.getItem('token');
     const socket = io(socketUrl, {
       transports: ['websocket'],
       path: '/socket.io',
+      auth: { token }
     });
 
     socket.on('connect', () => {
@@ -91,7 +93,7 @@ export default function TrackBus() {
       setConnected(false);
     });
 
-    socket.on('bus-location-update', (data) => {
+    socket.on('bus:location_updated', (data) => {
       setBusLocations((prev) => {
         const existing = prev.findIndex((b) => b.busId === data.busId);
         if (existing >= 0) {
@@ -101,6 +103,15 @@ export default function TrackBus() {
         }
         return [...prev, data];
       });
+    });
+
+    socket.on('bus:status_changed', (data) => {
+      if (data.status === 'completed' || data.status === 'offline') {
+        setBusLocations(prev => prev.filter(bus => bus.busId !== data.busId));
+        if (selectedBus?.busId === data.busId) {
+          setSelectedBus(null);
+        }
+      }
     });
 
     return () => {
@@ -121,10 +132,14 @@ export default function TrackBus() {
           try {
             const locRes = await parentAPI.getChildBusLocation(child._id);
             if (locRes.data?.data) {
+              const data = locRes.data.data;
               locations.push({
-                ...locRes.data.data,
+                ...data,
+                busId: data.busId?._id || data.bus || data.busId,
+                latitude: data.location?.coordinates[1] || data.latitude || 0,
+                longitude: data.location?.coordinates[0] || data.longitude || 0,
                 childName: child.name,
-                busNumber: child.assignedBus.busNumber || locRes.data.data.busId?.busNumber,
+                busNumber: child.assignedBus?.busNumber || data.busId?.busNumber,
               });
             }
           } catch (e) {
@@ -145,11 +160,6 @@ export default function TrackBus() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const isOnline = (lastUpdate) => {
-    const diff = Date.now() - new Date(lastUpdate).getTime();
-    return diff < 5 * 60 * 1000;
   };
 
   if (loading) {
@@ -198,7 +208,7 @@ export default function TrackBus() {
             </div>
             <div className="max-h-[500px] overflow-y-auto">
               {busLocations.map((bus) => {
-                const online = isOnline(bus.lastUpdate);
+                const online = true; // If data exists in the array, API verified it is En Route
                 return (
                   <button
                     key={bus.busId}
@@ -232,9 +242,9 @@ export default function TrackBus() {
                           {bus.childName || bus.driver || 'No driver'}
                         </p>
                       </div>
-                      {online && bus.speed > 0 && (
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                          {bus.speed} km/h
+                      {online && bus.speed >= 0 && (
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400 truncate ml-2">
+                          {Math.round(bus.speed)} km/h
                         </span>
                       )}
                     </div>
@@ -271,7 +281,7 @@ export default function TrackBus() {
                 <div className="flex items-center gap-2 text-sm">
                   <Navigation className="w-4 h-4 text-gray-400" />
                   <span className="text-gray-500 dark:text-gray-400">Speed:</span>
-                  <span className="font-medium text-black dark:text-white">{selectedBus.speed || 0} km/h</span>
+                  <span className="font-medium text-black dark:text-white">{Math.round(selectedBus.speed || 0)} km/h</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="w-4 h-4 text-gray-400" />
@@ -313,7 +323,7 @@ export default function TrackBus() {
                     <div className="p-2">
                       <h4 className="font-semibold text-gray-900">{bus.busNumber}</h4>
                       <p className="text-sm text-gray-600">{bus.childName}</p>
-                      <p className="text-sm text-gray-600">Speed: {bus.speed || 0} km/h</p>
+                      <p className="text-sm text-gray-600">Speed: {Math.round(bus.speed || 0)} km/h</p>
                     </div>
                   </Popup>
                 </Marker>
